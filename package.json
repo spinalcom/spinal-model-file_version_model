@@ -1,0 +1,26 @@
+{
+  "name": "spinal-model-file_version_model",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/FileVersionModel.js",
+  "scripts": {
+    "build": "rm -fr build && tsc",
+    "dev": "rm -fr build && tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "spinal-core-connectorjs_type": "git+https://github.com/spinalcom/spinal-core-connectorjs_type.git"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.12",
+    "tslint": "^5.11.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "typescript": "^3.2.2",
+    "typescript-eslint-parser": "^21.0.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "types": "build/FileVersionModel.d.ts"
+}
