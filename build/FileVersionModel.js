@@ -26,20 +26,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const spinal_core_connectorjs_type_1 = require("spinal-core-connectorjs_type");
 const loadModelPtr_1 = require("./utils/loadModelPtr");
 class FileVersionModel extends spinal_core_connectorjs_type_1.Model {
-    constructor(version, target) {
+    constructor(version, target, filename) {
         super();
         if (typeof version !== 'undefined' || typeof target !== 'undefined') {
             this.add_attr('versionId', version);
             this.add_attr('ptr', new spinal_core_connectorjs_type_1.Ptr(target));
             this.add_attr('date', Date.now());
             this.add_attr('description', '');
+            this.add_attr('filename', filename);
         }
     }
 }
 exports.FileVersionModel = FileVersionModel;
 class FileVersionContainerModel extends spinal_core_connectorjs_type_1.Model {
     static createFileVersion(file) {
-        const fileVersionContainerModel = new FileVersionContainerModel(file._ptr);
+        const fileVersionContainerModel = new FileVersionContainerModel(file._ptr, file.name.get());
         file._info.add_attr('version', new spinal_core_connectorjs_type_1.Ptr(fileVersionContainerModel));
         return fileVersionContainerModel;
     }
@@ -54,17 +55,17 @@ class FileVersionContainerModel extends spinal_core_connectorjs_type_1.Model {
         }
         return Promise.resolve(FileVersionContainerModel.createFileVersion(file));
     }
-    constructor(filePtr) {
+    constructor(filePtr, filename) {
         super();
         if (typeof filePtr !== 'undefined') {
             this.add_attr('current', filePtr);
             this.add_attr('versionLst', new spinal_core_connectorjs_type_1.Lst());
             this.add_attr('currentID', 0);
             this.add_attr('currentVersion', new spinal_core_connectorjs_type_1.Ptr(0));
-            this.addVersion(this.current.data.value, true);
+            this.addVersion(this.current.data.value, filename, true);
         }
     }
-    addVersion(path, setAsCurrent = true) {
+    addVersion(path, filename, setAsCurrent = true) {
         // get Max ID from list
         let maxIdx = 0;
         for (let idx = 0; idx < this.versionLst.length; idx++) {
@@ -74,7 +75,7 @@ class FileVersionContainerModel extends spinal_core_connectorjs_type_1.Model {
             }
         }
         // create a new versionModel
-        const newVersion = new FileVersionModel(++maxIdx, path);
+        const newVersion = new FileVersionModel(++maxIdx, path, filename);
         // push the model
         this.versionLst.push(newVersion);
         if (setAsCurrent === true) {

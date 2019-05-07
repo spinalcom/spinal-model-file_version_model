@@ -30,17 +30,19 @@ export class FileVersionModel extends Model {
   public ptr: spinal.Ptr<spinal.Path>;
   public date: spinal.Val;
   public description: spinal.Str;
+  public filename: spinal.Str;
 
-  public items? : spinal.Lst<any>;
-  public state? : spinal.Val;
+  public items?: spinal.Lst<any>;
+  public state?: spinal.Val;
 
-  constructor(version: number, target: number | spinal.Model) {
+  constructor(version?: number, target?: number | spinal.Model, filename?: string) {
     super();
     if (typeof version !== 'undefined' || typeof target !== 'undefined') {
       this.add_attr('versionId', version);
       this.add_attr('ptr', new Ptr(target));
       this.add_attr('date', Date.now());
       this.add_attr('description', '');
+      this.add_attr('filename', filename);
     }
   }
 }
@@ -52,7 +54,7 @@ export class FileVersionContainerModel extends Model {
 
   public static createFileVersion(file: spinal.File<any>): FileVersionContainerModel {
 
-    const fileVersionContainerModel = new FileVersionContainerModel(file._ptr);
+    const fileVersionContainerModel = new FileVersionContainerModel(file._ptr, file.name.get());
     file._info.add_attr('version', new Ptr(fileVersionContainerModel));
     return fileVersionContainerModel;
   }
@@ -69,17 +71,18 @@ export class FileVersionContainerModel extends Model {
     return Promise.resolve(FileVersionContainerModel.createFileVersion(file));
   }
 
-  constructor(filePtr?: spinal.Ptr<spinal.Path>) {
+  constructor(filePtr?: spinal.Ptr<spinal.Path>, filename?: string) {
     super();
     if (typeof filePtr !== 'undefined') {
       this.add_attr('current', filePtr);
       this.add_attr('versionLst', new Lst());
       this.add_attr('currentID', 0);
       this.add_attr('currentVersion', new Ptr(0));
-      this.addVersion(this.current.data.value, true);
+      this.addVersion(this.current.data.value, filename, true);
     }
   }
-  addVersion(path: number | spinal.Path, setAsCurrent: boolean = true): FileVersionModel {
+  addVersion(path: number | spinal.Path, filename: string,
+             setAsCurrent: boolean = true): FileVersionModel {
     // get Max ID from list
     let maxIdx = 0;
     for (let idx = 0; idx < this.versionLst.length; idx++) {
@@ -90,7 +93,7 @@ export class FileVersionContainerModel extends Model {
     }
 
     // create a new versionModel
-    const newVersion = new FileVersionModel(++maxIdx, path);
+    const newVersion = new FileVersionModel(++maxIdx, path, filename);
 
     // push the model
     this.versionLst.push(newVersion);
